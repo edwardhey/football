@@ -1,12 +1,13 @@
 package routers
 
 import (
-	"football/wx/controllers"
+	"edwardhey.com/football/wx/controllers"
 
 	"github.com/astaxie/beego"
 )
 
 func init() {
 	beego.Router("/", &controllers.MainController{})
-	//beego.AutoRouter(&controllers.ObjectController{})
+	// beego.Router("/api/", &controllers.ApiController{}, "*")
+	beego.AutoRouter(&controllers.WxController{})
 }

@@ -21,10 +21,6 @@ func init() {
 }
 
 const (
-	BusinessTypeActivity = 0
-)
-
-const (
 	nano = 1000 * 1000
 )
 
