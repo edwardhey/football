@@ -23,11 +23,14 @@ type Config struct {
 }
 
 const (
-	TPlayer = ModelType("Player")
-	MC_KEY  = "%s_%v"
+	TPlayer   = ModelType("Player")
+	TActivity = ModelType("Activity")
+	MC_KEY    = "%s_%v"
 
-	BusinessTypeID       = 0
-	BusinessTypeActivity = 0
+	IDGenrTypeNormal = 0
+	// IDGenrTypeUser     = 1
+	// IDGenrTypeActivity = 2
+	// IDGenrTypeOrder    = 3
 )
 
 var (
@@ -43,7 +46,7 @@ var (
 func InitManual() {
 	MC = cache.NewMemoryCache()
 	MC.StartAndGC(300)
-	IDGenr, _ = NewSnowFlake(BusinessTypeID)
+	IDGenr, _ = NewSnowFlake(IDGenrTypeNormal)
 	log.Debug("init db")
 	var err error
 	DB, err = gorm.Open("mysql", beego.AppConfig.String("db.dsn"))
@@ -56,7 +59,8 @@ func InitManual() {
 		panic(fmt.Sprintf("db connect failued!%s\r\n", err))
 	}
 
-	DB.SingularTable(true)
+	// DB.SingularTable(true)
+	// DB.Set("gorm:table_options", "ENGINE=InnoDB").CreateTable(&Activity{})
 }
 
 func InitConfig(c *Config) {
@@ -152,6 +156,24 @@ func Get(t ModelType, id interface{}) interface{} {
 	return obj
 }
 
+func SaveMcIfNotExists(objList ...interface{}) {
+	for _, obj := range objList {
+		ref := reflect.ValueOf(obj)
+		elem := ref.Elem()
+		objType := ModelType(reflect.TypeOf(obj).Elem().Name())
+
+		// elem.MethodByName("SetExists").Call(nil)
+		reflect.ValueOf(obj).MethodByName("SetExists").Call(nil)
+
+		if config, ok := initConfigMap[objType]; ok && config.EnableCache {
+			key := fmt.Sprintf(MC_KEY, config.CachePrefix, elem.FieldByName("Id"))
+			if MC.IsExist(key) == false {
+				MC.Put(key, obj, config.CacheExpired)
+			}
+		}
+	}
+}
+
 func SaveMc(objList ...interface{}) (err error) {
 	for _, obj := range objList {
 		ref := reflect.ValueOf(obj)
@@ -186,11 +208,10 @@ func Save(objList ...interface{}) (err error) {
 
 	// fmt.Println(objList)
 	err = SaveDb(objList...)
-	/*
-		if err != nil {
-			return
-		}*/
-	SaveMc(objList)
+	if err != nil {
+		return
+	}
+	err = SaveMc(objList...)
 	return
 }
 

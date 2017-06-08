@@ -30,18 +30,19 @@ func init() {
 
 func getPlayerByID(id uint64) (l *Player, err error) {
 	l = new(Player)
-	err = DB.Debug().Where("id=?", id).First(l).Error
+	err = DB.Where("id=?", id).First(l).Error
 	l.ID = id
 	return
 }
 
 func GetPlayerWithOpenID(openID string) *Player {
-	// p := Player{}
-	var p Player
-	err := DB.Debug().Table("player").Where("openID=?", openID).First(&p).Error
-	if err == nil {
-		SaveMc(&p)
-		return &p
+
+	var id struct {
+		ID uint64
+	}
+
+	if err := DB.Table("players").First(&id, "openID=?", openID).Error; err == nil {
+		return Get(TPlayer, id.ID).(*Player)
 	}
 	// fmt.Println(err)
 	return &Player{

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{.title}}水王足球</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <link rel="stylesheet" type="text/css" href="semantic/dist/semantic.min.css">
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <script src="semantic/dist/semantic.min.js"></script>
+</head>
+<body>
+    {{template "nav.html" .}}
+    {{.LayoutContent}}
+<!-- Content JS HERE !-->
+<style>
+    .first.container {
+        margin-bottom: 50px !important;
+    }
+
+    h1.ui.center.header {
+        margin-top: 3em;
+    }
+
+    h2.ui.center.header {
+        margin: 4em 0em 2em;
+    }
+
+    h3.ui.center.header {
+        margin-top: 2em;
+        padding: 2em 0em;
+    }
+</style>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        var
+            $headers = $('body > h3'),
+            $header = $headers.first(),
+            ignoreScroll = false,
+            timer
+            ;
+
+        // Preserve example in viewport when resizing browser
+        $(window)
+            .on('resize', function () {
+                // ignore callbacks from scroll change
+                clearTimeout(timer);
+                $headers.visibility('disable callbacks');
+
+                // preserve position
+                $(document).scrollTop($header.offset().top);
+
+                // allow callbacks in 500ms
+                timer = setTimeout(function () {
+                    $headers.visibility('enable callbacks');
+                }, 500);
+            })
+            ;
+        $headers
+            .visibility({
+                // fire once each time passed
+                once: false,
+
+                // don't refresh position on resize
+                checkOnRefresh: true,
+
+                // lock to this element on resize
+                onTopPassed: function () {
+                    $header = $(this);
+                },
+                onTopPassedReverse: function () {
+                    $header = $(this);
+                }
+            })
+            ;
+    });
+
+</script>
+</body>
+</html>

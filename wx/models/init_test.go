@@ -1,9 +1,6 @@
 package models
 
 import (
-	"fmt"
-	"testing"
-
 	"github.com/astaxie/beego"
 )
 
@@ -14,12 +11,4 @@ func init() {
 	beego.ParseConfig()
 	// fmt.Println(beego.AppConfig.String("appname"))
 	InitManual()
-}
-
-func TestBoxInitRecords(t *testing.T) {
-	p := GetPlayerWithOpenID("oIlcp1ocbxjOhScmOWIn67ViKpXo")
-	fmt.Println(p)
-	// Save(p)
-
-	// fmt.Println(getPlayerByID(52174304581779456))
 }

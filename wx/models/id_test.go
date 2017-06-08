@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -14,6 +13,6 @@ func TestNewId(t *testing.T) {
 	if id1 == id2 {
 		t.Error("id genr same")
 	}
-	fmt.Println(NewActivatyID())
+	// fmt.Println(NewActivatyID())
 	// t.Error("aaaaaaaaaa")
 }

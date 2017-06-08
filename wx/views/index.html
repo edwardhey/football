@@ -1,0 +1,89 @@
+<!--<div class="ui fluid vertical menu">
+    {{range $index, $elem := .activities}}
+    <a class="item" href="{{.ID}}">
+        <h1 class="ui medium header">[{{Date .BeginTime "Y-m-d"}}][{{Date .BeginTime "H:i"}} - {{Date .EndTime "H:i"}}]{{.Name}} </h1>
+        <p>地址：{{.Address}}</p>
+        <p>名额：{{.MaxActorNums}}</p>
+        <p>状态：{{.Status|GetActivityStatusString}} {{if .Status }}{{else}}{{Date .OpenTime "Y-m-d H:i:s"}} 开始报名{{end}} </p>
+    </a>
+    {{end}}
+</div>-->
+<h1 class="ui center aligned header">{{.title}}</h1>
+
+
+
+<div class="ui container">
+    <div class="ui relaxed divided items">
+        <!--<div class="item">
+            <div class="ui small image">
+                <img src="/static/img/thumail.png">
+            </div>
+            <div class="content">
+                <a class="header">Content Header</a>
+                <div class="meta">
+                    <a>Date</a>
+                    <a>Category</a>
+                </div>
+                <div class="description">
+                    A description which may flow for several lines and give context to the content.
+                </div>
+                <div class="extra">
+                    <img src="assets/images/wireframe/square-image.png" class="ui circular avatar image"> Username
+                </div>
+            </div>
+        </div>-->
+
+        {{range $index, $elem := .activities}}
+        <div class="item">
+            <div class="ui small image">
+                <img src="/static/img/thumail.png">
+            </div>
+            <div class="content">
+                <a class="header" href="/activity/info?id={{.ID}}">{{.Name}}</a>
+                <div class="meta">
+                    <a>{{Date .BeginTime "Y-m-d H:i"}}</a>
+                </div>
+                <div class="description">
+                    {{.Address}}
+                </div>
+                <div class="extra">
+                     {{if eq 10 .Status }}
+                    <a class="ui right floated primary blue button" href="/activity/signUp?id={{.ID}}">报名 »</a>
+                    {{end}}
+                    <div class="ui label">{{.MaxActorNums}}人</div>
+                    <div class="ui label">{{.Status|GetActivityStatusString}} {{if eq 0 .Status }}{{Date .OpenTime "Y-m-d H:i:s"}} 开始报名{{end}}</div>
+                </div>
+            </div>
+        </div>
+        {{end}}
+
+        
+        <!--<div class="item">
+            <div class="ui small image">
+                <img src="/static/img/thumail.png">
+            </div>
+            <div class="content">
+                <a class="header">Content Header</a>
+                <div class="meta">
+                    <a>Date</a>
+                    <a>Category</a>
+                </div>
+                <div class="description">
+                    A description which may flow for several lines and give context to the content.
+                </div>
+                <div class="extra">
+                    <div class="ui right floated primary button">
+                        Primary
+                        <i class="right chevron icon"></i>
+                    </div>
+                </div>
+            </div>
+        </div>-->
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        ActiveStep("newActivities");
+    });
+</script>

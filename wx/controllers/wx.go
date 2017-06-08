@@ -27,12 +27,6 @@ type WxController struct {
 	BaseController
 }
 
-func (c *WxController) ThrowErr(msg string) {
-	// c.Ctx.WriteString(msg)
-	// log.Fatalln(msg)
-	c.CustomAbort(500, msg)
-}
-
 func (c *WxController) Prepare() {
 	// c.IsJSON = false
 	c.BaseController.Prepare()
@@ -111,4 +105,8 @@ func (c *WxController) Callback() {
 	player.RefreshToken = token.RefreshToken
 	models.Save(player)
 
+	c.StartSession()
+	c.SetSession("player", player)
+	c.Redirect("/", 302)
+	// c.CustomAbort(200, "aaa")
 }

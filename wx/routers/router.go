@@ -10,4 +10,5 @@ func init() {
 	beego.Router("/", &controllers.MainController{})
 	// beego.Router("/api/", &controllers.ApiController{}, "*")
 	beego.AutoRouter(&controllers.WxController{})
+	beego.AutoRouter(&controllers.ActivityController{})
 }

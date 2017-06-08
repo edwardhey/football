@@ -25,10 +25,6 @@ const (
 )
 
 const (
-	businessTypeOrder = 1
-)
-
-const (
 	TimestampBits = 40                         // timestamp
 	Maxtimestamp  = -1 ^ (-1 << TimestampBits) // timestamp mask
 	SequenceBits  = 6                          // sequence
