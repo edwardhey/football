@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"fmt"
-
 	"edwardhey.com/football/wx/models"
 )
 
@@ -17,9 +15,10 @@ func (c *MainController) Prepare() {
 }
 
 func (c *MainController) Get() {
-	fmt.Println(c.GetSession("openID"))
+	// fmt.Println(c.GetSession("openID"))
+	// fmt.Println(GetRequestURIWithUrlFor("AsyncschedulerController.ActiveActivity"))
 	c.Data["title"] = "活动列表"
-	c.Data["activities"] = models.GetActivities()
+	c.Data["activities"] = models.GetNewestActivities(5)
 	// for a, b := range models.GetActivities() {
 	// 	fmt.Println(a, b.ID)
 	// }

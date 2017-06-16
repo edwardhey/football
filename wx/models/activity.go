@@ -17,19 +17,21 @@ type Activity struct {
 	CloseTime    uint32         `gorm:"column:closeTime;default:0"`    //活动截止报名时间
 	MinActorNums uint32         `gorm:"column:minActorNums;default:0"` //最小参与者人数
 	MaxActorNums uint32         `gorm:"column:maxActorNums;default:0"` //最大参与者人数
+	Price        int32          `gorm:"default:0"`                     //价格,单位分
 	Lat          uint32         `gorm:"default:0"`                     //纬度
-	Lng          uint32         `orm:"default:0"`                      //经度
+	Lng          uint32         `gorm:"default:0"`                     //经度
 	Base
 }
 
 type ActivityStatus int8
 
 const (
-	ActivityStatusCancel      = ActivityStatus(-1)  //活动已取消
-	ActivityStatusUnactivated = ActivityStatus(0)   //活动未激活，未到报名开始时间
-	ActivityStatusActivated   = ActivityStatus(10)  //活动已激活，可以报名
-	ActivityStatusInEffect    = ActivityStatus(30)  //活动已生效
-	ActivityStatusComplete    = ActivityStatus(100) //活动已完成报名
+	ActivityStatusCancel      = ActivityStatus(-1) //活动已取消
+	ActivityStatusUnactivated = ActivityStatus(0)  //活动未激活，未到报名开始时间
+	ActivityStatusActivated   = ActivityStatus(10) //活动已激活，可以报名
+	ActivityStatusInEffect    = ActivityStatus(30) //活动已生效
+	// ActivityStatusFull        = ActivityStatus(40)  //活动已满额
+	ActivityStatusComplete = ActivityStatus(100) //活动已结束
 )
 
 var StatusString map[ActivityStatus]string = map[ActivityStatus]string{
@@ -49,6 +51,10 @@ func GetActivityStatusString(s ActivityStatus) string {
 // func init() {
 // 	idGenr, _ = GetSnowFlake(BusinessTypeActivity)
 // }
+
+func (a *Activity) PriceString() string {
+	return fmt.Sprintf("%.2f", float32(a.Price)/100)
+}
 
 func (a *Activity) IDString() string {
 	return strconv.FormatUint(a.ID, 10)
@@ -73,22 +79,26 @@ func NewActivaty(t time.Time) *Activity {
 		BeginTime:    _tUninxTime,
 		EndTime:      _tUninxTime + 7200,
 		OpenTime:     uint32(time.Now().Unix()),
+		Price:        3000,
 	}
 	activity.CloseTime = activity.BeginTime - 1
 	// activity.Name =
 	return activity
 }
 
-func GetActivities() (out []*Activity) {
-	var ids []struct {
-		ID uint64 `gorm:"column:ID"`
-	}
+func GetNewestActivities(l uint8) (out []*Activity) {
 	// var activities []Activity
 	out = make([]*Activity, 0)
-	if err := DB.Table("activities").Limit(10).Order("ctime desc").Scan(&ids).Error; err == nil {
-		for _, id := range ids {
-			// out[idx] = Get(TActivity, id.ID).(*Activity)
-			out = append(out, Get(TActivity, id.ID).(*Activity))
+	rows, err := DB.Table(initConfigMap[TActivity].TableName).Select("ID").Limit(l).Order("ctime desc").Rows()
+	defer rows.Close()
+	if err == nil {
+		for rows.Next() {
+			var id uint64
+			rows.Scan(&id)
+
+			// DB.ScanRows(rows, &id)
+			// do something
+			out = append(out, Get(TActivity, id).(*Activity))
 		}
 	}
 	return
@@ -121,6 +131,7 @@ func init() {
 		CachePrefix:  "Activity",
 		CacheExpired: cacheExpired,
 		GetByIdFunc:  getActivityByID,
+		TableName:    "activities",
 	})
 }
 

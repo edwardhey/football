@@ -5,10 +5,11 @@ import (
 )
 
 type Base struct {
-	Ctime     uint32 `gorm:"column:ctime;default:0"` //创建时间
-	Mtime     uint32 `gorm:"column:mtime;default:0"` //更改时间
-	isExists  bool   `gorm:"-"`
-	isDeleted bool   `gorm:"-"`
+	Ctime     uint32 `orm:"column:ctime;default:0"` //创建时间
+	Mtime     uint32 `orm:"column:mtime;default:0"` //更改时间
+	isExists  bool   `orm:"-"`
+	isDeleted bool   `orm:"-"`
+	// orm.Model
 }
 
 /**

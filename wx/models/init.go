@@ -8,7 +8,7 @@ import (
 	"reflect"
 
 	"github.com/astaxie/beego"
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/go-sql-driver/mysql" // import your used driver
 	"github.com/jinzhu/gorm"
 )
 
@@ -19,13 +19,16 @@ type Config struct {
 	CachePrefix  string
 	CacheExpired int64
 	Type         ModelType
+	TableName    string
 	GetByIdFunc  interface{}
 }
 
 const (
 	TPlayer   = ModelType("Player")
 	TActivity = ModelType("Activity")
-	MC_KEY    = "%s_%v"
+	TActor    = ModelType("Actor")
+
+	MC_KEY = "%s_%v"
 
 	IDGenrTypeNormal = 0
 	// IDGenrTypeUser     = 1
@@ -34,6 +37,7 @@ const (
 )
 
 var (
+	// ORM    orm.Ormer
 	DB     *gorm.DB
 	MC     *cache.MemoryCache
 	IDGenr *SnowFlake
@@ -44,11 +48,12 @@ var (
 )
 
 func InitManual() {
+	var err error
 	MC = cache.NewMemoryCache()
 	MC.StartAndGC(300)
 	IDGenr, _ = NewSnowFlake(IDGenrTypeNormal)
 	log.Debug("init db")
-	var err error
+
 	DB, err = gorm.Open("mysql", beego.AppConfig.String("db.dsn"))
 	if err != nil {
 		panic(err)
@@ -60,6 +65,9 @@ func InitManual() {
 	}
 
 	// DB.SingularTable(true)
+	// DB.Set("gorm:table_options", "ENGINE=InnoDB").CreateTable(&Activity{})
+	// DB.Set("gorm:table_options", "ENGINE=InnoDB").CreateTable(&Actor{})
+	DB.Set("gorm:table_options", "ENGINE=InnoDB").CreateTable(&Player{})
 	// DB.Set("gorm:table_options", "ENGINE=InnoDB").CreateTable(&Activity{})
 }
 
@@ -81,8 +89,10 @@ func SaveDb(objList ...interface{}) (err error) {
 			return nil
 		}
 		if elem.FieldByName("isExists").Bool() == true {
+			// _, err = ORM.Update(obj)
 			err = DB.Save(obj).Error
 		} else {
+			// _, err = ORM.Insert(obj)
 			err = DB.Create(obj).Error
 		}
 		if err != nil {
@@ -91,11 +101,16 @@ func SaveDb(objList ...interface{}) (err error) {
 		}
 	} else {
 		tx := DB.Begin()
+		// err = ORM.Begin()
+		if err != nil {
+			return err
+		}
 		defer func() {
 			if err == nil {
 				err = tx.Commit().Error
+				// err = ORM.Commit()
 			} else {
-				tx.Rollback()
+				err = tx.Rollback().Error
 			}
 		}()
 		for _, obj := range objList {
@@ -105,7 +120,9 @@ func SaveDb(objList ...interface{}) (err error) {
 			}
 			if elem.FieldByName("isExists").Bool() == true {
 				err = tx.Save(obj).Error
+				// _, err = ORM.Update(obj)
 			} else {
+				// _, err = ORM.Insert(obj)
 				err = tx.Create(obj).Error
 			}
 			if err != nil {
@@ -211,6 +228,7 @@ func Save(objList ...interface{}) (err error) {
 	if err != nil {
 		return
 	}
+	// fmt.Println("aaaaaa", objList)
 	err = SaveMc(objList...)
 	return
 }
@@ -241,13 +259,26 @@ func Del(objs ...interface{}) (err error) {
 		}
 	}
 	if len(objs) == 1 {
+		// _, err = ORM.Delete(objs[0])
 		err = DB.Delete(objs[0]).Error
 	} else {
 		tx := DB.Begin()
-		for _, obj := range objs {
-			tx.Delete(obj)
+		// err = ORM.Begin()
+		if err != nil {
+			return
 		}
-		err = tx.Commit().Error
+		for _, obj := range objs {
+			err = tx.Delete(obj).Error
+			if err != nil {
+				break
+			}
+			// tx.Delete(obj)
+		}
+		if err != nil {
+			err = tx.Rollback().Error
+		} else {
+			err = tx.Commit().Error
+		}
 	}
 	if err != nil {
 		return

@@ -1,9 +1,11 @@
 package controllers
 
 import (
-	"fmt"
+	"reflect"
 	"strings"
 	"time"
+
+	"edwardhey.com/football/wx/models"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/toolbox"
@@ -45,6 +47,9 @@ func (c *BaseController) ThrowErr(msg string) {
 }
 
 func init() {
+	beego.AddFuncMap("GetActivityStatusString", models.GetActivityStatusString)
+	beego.AddFuncMap("Date", Date)
+	beego.AddFuncMap("CallMethod", CallMethod)
 	beego.SetStaticPath("/semantic", "static/semantic")
 	tk := toolbox.NewTask("createActivity", "0 19 0 * * 3", func() error {
 		//创建报名活动，并推送到微信用户
@@ -65,8 +70,17 @@ func (c *AuthorizedController) Prepare() {
 		//TODO：上线要改成auth
 		c.Redirect("/wx/callback/?code=041LPhzd2bPOrA0T8exd2Zdhzd2LPhzy&state=", 302)
 	}
-	fmt.Println(c.GetSession("player"))
+	// fmt.Println(c.GetSession("player"))
 	// user := models.GetPlayerWithOpenID(c.Op)
+}
+
+//----------------funcs----------------------------------
+func GetRequestURIWithUrlFor(path string) string {
+	port := beego.AppConfig.String("httpport")
+	if port == "80" {
+		return beego.AppConfig.String("hostname") + beego.URLFor(path)
+	}
+	return beego.AppConfig.String("hostname") + ":" + beego.AppConfig.String("httpport") + beego.URLFor(path)
 }
 
 //-------------tpl funcs-------------------------------
@@ -117,4 +131,8 @@ func Date(t uint32, format string) string {
 	format = replacer.Replace(format)
 	_t := time.Unix(int64(t), 0)
 	return _t.Format(format)
+}
+
+func CallMethod(obj interface{}, methodStr string) string {
+	return reflect.ValueOf(obj).MethodByName(methodStr).Call(nil)[0].String()
 }

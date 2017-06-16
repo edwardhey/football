@@ -33,14 +33,26 @@ func (c *WxController) Prepare() {
 }
 
 func (c *WxController) Auth() {
+	c.StartSession()
+	// p :=
+	if c.GetSession("player") != nil {
+		c.Redirect(beego.URLFor("MainController.Get"), 302)
+		return
+	}
+
 	url := wx_oauth2.AuthCodeURL(wxAppID, "http://fb.innomix.com.cn/wx/callback", "snsapi_userinfo", "")
 	c.Redirect(url, 302)
 	//fmt.Println(url)
 }
 
 func (c *WxController) Callback() {
+	c.StartSession()
+	// p :=
+	if c.GetSession("player") != nil {
+		// c.Redirect(beego.URLFor("MainController.Get"), 302)
+	}
 	// var err error
-	fmt.Println(c.GetString("code"))
+	// fmt.Println(c.GetString("code"))
 	code := c.GetString("code")
 	if code == "" {
 		// c.Ctx.WriteString("用户禁止授权")
@@ -105,7 +117,6 @@ func (c *WxController) Callback() {
 	player.RefreshToken = token.RefreshToken
 	models.Save(player)
 
-	c.StartSession()
 	c.SetSession("player", player)
 	c.Redirect("/", 302)
 	// c.CustomAbort(200, "aaa")

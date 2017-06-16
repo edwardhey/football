@@ -7,10 +7,15 @@ import (
 )
 
 type ActivityController struct {
-	BaseController
+	AuthorizedController
 }
 
-func (c *ActivityController) Active() {
+func (c *ActivityController) Info() {
+
+}
+
+//Join 参加活动
+func (c *ActivityController) Join() {
 	c.IsJSON = true
 	// safe := &io.LimitedReader{R: c.Ctx..Context.Request.Body, N: 100000000}
 	_id, err := c.GetInt64("ID")
@@ -20,16 +25,17 @@ func (c *ActivityController) Active() {
 	id := uint64(_id)
 	activity := models.Get(models.TActivity, id).(*models.Activity)
 	if activity.IsNew() {
-		c.ThrowErr("活动已下线或不存在")
+		c.ThrowErr("活动不存在")
 	}
-	activity.Status = models.ActivityStatusActivated
-	fmt.Println(activity)
-	models.Save(activity)
-	// fmt.Println(id, aa, string(c.Ctx.Input.RequestBody))
-	// // c.JsonData["data"] = "123"
-	// c.StartSession()
-	// fmt.Println(c.Data, c.GetSession("openID"))
-	// c.Data["Website"] = "fb.edwardhey.com"
-	// c.Data["Email"] = "fb@edwardhey.com"
-	// c.TplName = "index.tpl"
+
+	fmt.Println(models.GetActorsWithActivity(activity))
+	p := c.GetSession("player").(*models.Player)
+	fmt.Println(p.IsJoinActivity(activity))
+	if p.IsJoinActivity(activity) {
+		c.ThrowErr("您已报名参加，请勿重复报名")
+	}
+	actor := p.JoinActivity(activity, 1)
+	fmt.Println(actor)
+	err = models.Save(actor)
+	fmt.Println(err)
 }

@@ -1,4 +1,11 @@
 wx/conf/app.conf
+wx/sessions/
+wx/wx
+
+
+.vscode/
+.DS_Store
+
 # Binaries for programs and plugins
 *.exe
 *.dll

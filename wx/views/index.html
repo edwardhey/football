@@ -39,19 +39,28 @@
                 <img src="/static/img/thumail.png">
             </div>
             <div class="content">
-                <a class="header" href="/activity/info?id={{.ID}}">{{.Name}}</a>
+                <a class="header">{{.Name}}</a>
                 <div class="meta">
-                    <a>{{Date .BeginTime "Y-m-d H:i"}}</a>
+                    <a>发布时间：{{Date .BeginTime "Y-m-d H:i"}}</a>
                 </div>
                 <div class="description">
                     {{.Address}}
                 </div>
                 <div class="extra">
-                     {{if eq 10 .Status }}
-                    <a class="ui right floated primary blue button" href="/activity/signUp?id={{.ID}}">报名 »</a>
+                    <div class="ui label">限：{{.MaxActorNums}}人</div>
+                    <div class="ui label">余：{{.MaxActorNums}}人</div>
+                    {{if ge 0 .Status}}
+                        <div class="ui label">{{.Status|GetActivityStatusString}}</div>
+                    {{else}}
+                        {{ if le 10 .Status}}
+                        {{ if gt 100 .Status}}
+                        <div class="ui label">{{.Status|GetActivityStatusString}} {{if eq 0 .Status }}{{Date .OpenTime "Y-m-d H:i:s"}} 开始报名{{end}}</div>
+                        <a class="ui right floated primary blue button" href="/activity/join?ID={{.ID}}"> {{if lt 0 .Price}} ￥{{CallMethod . "PriceString"}} {{else}}免费{{end}}报名 »</a>
+                        {{else}}
+                        <div class="ui label">{{.Status|GetActivityStatusString}}</div>
+                        {{end}}
+                        {{end}}
                     {{end}}
-                    <div class="ui label">{{.MaxActorNums}}人</div>
-                    <div class="ui label">{{.Status|GetActivityStatusString}} {{if eq 0 .Status }}{{Date .OpenTime "Y-m-d H:i:s"}} 开始报名{{end}}</div>
                 </div>
             </div>
         </div>
